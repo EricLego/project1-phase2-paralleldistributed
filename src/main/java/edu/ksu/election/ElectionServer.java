@@ -7,25 +7,26 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Locale;
 
 public class ElectionServer extends UnicastRemoteObject implements Election {
-    private final int[] votes = {0, 0};
+    private int yes = 0, no = 0, dontCare = 0;
 
     protected ElectionServer() throws RemoteException { super(); }
 
     @Override
-    public synchronized void castVote(String candidateName) throws RemoteException {
-        if (candidateName == null) throw new RemoteException("Null candidate");
-        String c = candidateName.trim().toUpperCase(Locale.ROOT);
-        switch (c) {
-            case "A": votes[0]++; break;
-            case "B": votes[1]++; break;
-            default: throw new RemoteException("Unknown candidate: " + candidateName + " (use A or B)");
+    public synchronized void castVote(String response) throws RemoteException {
+        if (response == null) throw new RemoteException("Null response");
+        String r = response.trim().toLowerCase(Locale.ROOT);
+        switch (r) {
+            case "yes": yes++; break;
+            case "no": no++; break;
+            case "dontcare": dontCare++; break;
+            default: throw new RemoteException("Unknown response: " + response + " (use yes, no, or dontcare)");
         }
-        System.out.println("Vote cast for " + c + " -> [A=" + votes[0] + ", B=" + votes[1] + "]");
+        System.out.println("Vote cast for " + r + " -> [yes=" + yes + ", no=" + no + ", dontcare=" + dontCare + "]");
     }
 
     @Override
-    public synchronized int[] getResult() throws RemoteException {
-        return new int[]{votes[0], votes[1]};
+    public synchronized String getResult() throws RemoteException {
+        return yes + " yes, " + no + " no, " + dontCare + " don't care";
     }
 
     public static void main(String[] args) {
